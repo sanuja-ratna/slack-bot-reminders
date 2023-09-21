@@ -1,0 +1,45 @@
+import os
+import time
+from slack import WebClient
+from slack.errors import SlackApiError
+
+# Initialized Slack API client with my bot token
+slack_token = "xoxb-5913004310231-5913121895127-P0wOaBaZk3xtwxPRWyorVsyW"
+client = WebClient(token=slack_token)
+
+# Function to send a reminder message to a user
+def send_reminder(user_id, message):
+    try:
+        # Send a direct message to the user
+        response = client.chat_postMessage(channel=user_id, text=message)
+        return response
+    except SlackApiError as e:
+        print(f"Error sending reminder: {e.response['error']}")
+
+# Function to set a reminder for a user
+def set_reminder(user_id, reminder_time, reminder_message):
+    try:
+        # Convert reminder_time to a Unix timestamp
+        timestamp = int(time.mktime(time.strptime(reminder_time, "%Y-%m-%d %H:%M:%S")))
+
+        # Schedule the reminder
+        response = client.reminders_add(
+            user=user_id,
+            text=reminder_message,
+            time=timestamp
+        )
+        return response
+    except Exception as e:
+        print(f"Error setting reminder: {e}")
+
+# Main function
+if __name__ == "__main__":
+    user_id = "@SANU R" 
+    reminder_time = "2023-09-20 15:00:00"
+    reminder_message = "Don't forget your important task!"
+
+    # Set the reminder for the user
+    set_reminder(user_id, reminder_time, reminder_message)
+
+    # Optionally, you can also send the user a direct message immediately
+    send_reminder(user_id, f"Reminder set for {reminder_time}: {reminder_message}")
